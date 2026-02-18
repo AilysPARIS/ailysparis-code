@@ -1,0 +1,233 @@
+<!DOCTYPE html> 
+
+<html lang="fr"> 
+
+<head> 
+
+    <meta charset="UTF-8"> 
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+
+    <title>Espace Privé - Partage de Souvenirs</title> 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> 
+
+    <style> 
+
+        :root { --main: #ffffff; } 
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; } 
+
+        body, html { height: 100%; width: 100%; background: #000; color: white; overflow: hidden; } 
+
+ 
+
+        /* CONFIGURATION */ 
+
+        #setup { 
+
+            position: fixed; inset: 0; background: #0a0a0a; 
+
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+
+            z-index: 1000; padding: 25px; 
+
+        } 
+
+        .config-card { background: #1a1a1a; padding: 40px; border-radius: 2px; width: 100%; max-width: 450px; border: 1px solid #333; } 
+
+        h2 { margin-bottom: 25px; font-weight: 200; letter-spacing: 4px; text-transform: uppercase; color: var(--main); } 
+
+        input { width: 100%; padding: 15px; margin: 10px 0; background: #000; border: 1px solid #333; color: white; font-size: 1rem; } 
+
+        .btn-launch { background: white; color: black; border: none; padding: 20px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 25px; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; } 
+
+        .btn-launch:hover { background: #ccc; } 
+
+ 
+
+        /* L'AFFICHE NEUTRE ET LUXUEUSE */ 
+
+        #poster { 
+
+            height: 100vh; width: 100vw; display: none;  
+
+            flex-direction: column; align-items: center; justify-content: center; 
+
+            background-size: cover; background-position: center; position: relative; 
+
+        } 
+
+        #poster::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.7); z-index: 1; } 
+
+ 
+
+        .poster-content { position: relative; z-index: 10; text-align: center; width: 100%; padding: 0 5%; } 
+
+        h1 { font-size: 5rem; font-weight: 200; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 15px; } 
+
+        .line { width: 100px; height: 1px; background: white; margin: 20px auto; } 
+
+        .instruction { font-size: 1.5rem; margin-bottom: 45px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; } 
+
+         
+
+        .qr-outer {  
+
+            background: white; padding: 15px;  
+
+            display: inline-block;  
+
+            box-shadow: 0 0 60px rgba(255,255,255,0.1); 
+
+            margin-bottom: 40px; 
+
+        } 
+
+ 
+
+        .footer-minimal { margin-top: 40px; font-size: 0.8rem; letter-spacing: 4px; opacity: 0.5; text-transform: uppercase; } 
+
+ 
+
+        .nav { position: fixed; top: 30px; right: 30px; z-index: 2000; } 
+
+        .btn-nav { background: none; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 15px; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; } 
+
+ 
+
+        @media print { .nav { display: none; } } 
+
+    </style> 
+
+</head> 
+
+<body> 
+
+ 
+
+    <div id="setup"> 
+
+        <div class="config-card"> 
+
+            <h2>Interface Neutre</h2> 
+
+            <input type="text" id="url-input" placeholder="Lien de votre galerie (neutre)"> 
+
+            <input type="text" id="name-input" placeholder="NOM DE L'ÉVÉNEMENT"> 
+
+            <input type="file" id="bg-input" accept="image/*"> 
+
+            <button class="btn-launch" onclick="launch()">Générer l'affiche</button> 
+
+        </div> 
+
+    </div> 
+
+ 
+
+    <div id="poster"> 
+
+        <div class="nav"> 
+
+            <button class="btn-nav" onclick="window.print()">Imprimer</button> 
+
+            <button class="btn-nav" onclick="location.reload()">Reset</button> 
+
+        </div> 
+
+ 
+
+        <div class="poster-content"> 
+
+            <h1 id="display-name">ÉVÉNEMENT</h1> 
+
+            <div class="line"></div> 
+
+            <p class="instruction">Album Photo Collaboratif</p> 
+
+             
+
+            <div class="qr-outer"> 
+
+                <div id="qrcode"></div> 
+
+            </div> 
+
+             
+
+            <p class="footer-minimal">Scan • Upload • View • No Login Required</p> 
+
+        </div> 
+
+    </div> 
+
+ 
+
+    <script> 
+
+        function launch() { 
+
+            const url = document.getElementById('url-input').value; 
+
+            const name = document.getElementById('name-input').value; 
+
+            const bgFile = document.getElementById('bg-input').files[0]; 
+
+ 
+
+            if (!url) return alert("Veuillez entrer le lien de votre galerie !"); 
+
+ 
+
+            document.getElementById('display-name').textContent = name || "ALBUM PRIVÉ"; 
+
+ 
+
+            document.getElementById('qrcode').innerHTML = ""; 
+
+            new QRCode(document.getElementById("qrcode"), { 
+
+                text: url, 
+
+                width: 250, 
+
+                height: 250, 
+
+                colorDark : "#000000", 
+
+                colorLight : "#ffffff", 
+
+                correctLevel : QRCode.CorrectLevel.H 
+
+            }); 
+
+ 
+
+            if (bgFile) { 
+
+                const reader = new FileReader(); 
+
+                reader.onload = (e) => { 
+
+                    document.getElementById('poster').style.backgroundImage = `url(${e.target.result})`; 
+
+                }; 
+
+                reader.readAsDataURL(bgFile); 
+
+            } 
+
+ 
+
+            document.getElementById('setup').style.display = "none"; 
+
+            document.getElementById('poster').style.display = "flex"; 
+
+        } 
+
+    </script> 
+
+</body> 
+
+</html> 
